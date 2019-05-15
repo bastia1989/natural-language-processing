@@ -12,7 +12,7 @@ RESOURCE_PATH = {
     'TAG_CLASSIFIER': 'tag_classifier.pkl',
     'TFIDF_VECTORIZER': 'tfidf_vectorizer.pkl',
     'THREAD_EMBEDDINGS_FOLDER': 'thread_embeddings_by_tags',
-    'WORD_EMBEDDINGS': 'word_embeddings.tsv',
+    'WORD_EMBEDDINGS': 'data/word_embeddings.tsv',
 }
 
 
@@ -49,29 +49,40 @@ def load_embeddings(embeddings_path):
     ########################
     #### YOUR CODE HERE ####
     ########################
-
-    # remove this when you're done
-    raise NotImplementedError(
-        "Open utils.py and fill with your code. In case of Google Colab, download"
-        "(https://github.com/hse-aml/natural-language-processing/blob/master/project/utils.py), "
-        "edit locally and upload using '> arrow on the left edge' -> Files -> UPLOAD")
-
-
-def question_to_vec(question, embeddings, dim):
-    """Transforms a string to an embedding by averaging word embeddings."""
+    embeddings = {}
+    for line in open(embeddings_path):
+        word,*vec = line.strip().split()
+        vf = []
+        for v in vec:
+            # print(v)
+            vf.append(float(v))
+        embeddings[word] = np.array(vf)
     
-    # Hint: you have already implemented exactly this function in the 3rd assignment.
-
-    ########################
-    #### YOUR CODE HERE ####
-    ########################
+    embeddings_dim = embeddings[word].size
+    return embeddings, embeddings_dim
 
     # remove this when you're done
-    raise NotImplementedError(
-        "Open utils.py and fill with your code. In case of Google Colab, download"
-        "(https://github.com/hse-aml/natural-language-processing/blob/master/project/utils.py), "
-        "edit locally and upload using '> arrow on the left edge' -> Files -> UPLOAD")
 
+
+def question_to_vec(question, embeddings, dim=300):
+    """
+        question: a string
+        embeddings: dict where the key is a word and a value is its' embedding
+        dim: size of the representation
+
+        result: vector representation for the question
+    """
+    keys = question.split(' ')
+    question_vec = np.zeros(dim)
+    k = 0
+    for key in keys:
+        try:
+            question_vec += embeddings[key]
+            k += 1
+        except:
+            continue
+    
+    return question_vec/k if k != 0 else question_vec
 
 def unpickle_file(filename):
     """Returns the result of unpickling the file content."""
